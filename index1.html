@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOLDEN TIME: DAWN LIVING ROOM</title>
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --panel-bg: rgba(30, 41, 59, 0.8);
+            --green: #10b981;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --text-light: #f8fafc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; user-select: none; }
+
+        body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-light);
+            transition: background 1.5s ease;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            background: linear-gradient(to bottom, #111827, #1e1e24);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #334155;
+            transition: all 1.5s ease;
+        }
+
+        /* 공통 UI */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 25px;
+            background: rgba(0,0,0,0.5);
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 10;
+        }
+        
+        .time-badge { background: #1e293b; padding: 5px 12px; border-radius: 20px; color: #94a3b8; }
+
+        .scene {
+            display: none;
+            flex: 1;
+            padding: 20px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        .scene.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .btn {
+            background: linear-gradient(145deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            transition: transform 0.1s, filter 0.2s;
+            margin-top: 20px;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn:hover { filter: brightness(1.2); }
+
+        /* Scene 1: 타이틀 */
+        .main-title { font-size: 32px; font-weight: 900; letter-spacing: 2px; margin-bottom: 10px; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+
+        /* Scene 2: CPR 메인 UI (참고 이미지 기반) */
+        .cpr-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 배경 사람 인체 실루엣 느낌 */
+        .human-torso {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -45%);
+            width: 350px; height: 400px;
+            background: radial-gradient(ellipse at center, rgba(71, 85, 105, 0.4) 0%, transparent 70%);
+            z-index: 0;
+            border-radius: 50% 50% 0 0;
+        }
+
+        /* 링 애니메이션 및 타겟 */
+        .cpr-target-zone {
+            position: relative;
+            z-index: 2;
+            width: 240px; height: 240px;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 8px solid #334155;
+            transition: border-color 0.1s ease, transform 0.1s ease;
+        }
+        .ring-outer { width: 220px; height: 220px; border-top-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
+        .ring-inner { width: 170px; height: 170px; border-left-color: transparent; border-right-color: transparent; transform: rotate(45deg); }
+        
+        .press-btn {
+            position: relative;
+            z-index: 3;
+            width: 90px; height: 90px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 4px solid var(--red);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 40px; cursor: pointer;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+        }
+        .press-btn:active { transform: scale(0.9); }
+
+        /* 안내 패널들 */
+        .info-panel {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+        }
+
+        .panel-left { width: 200px; text-align: left; }
+        .panel-right { width: 220px; text-align: left; }
+        
+        .stat-row { margin-bottom: 8px; font-weight: bold; font-size: 16px; }
+        .stat-value { color: var(--green); float: right; }
+
+        .bpm-display {
+            position: absolute;
+            bottom: -40px;
+            width: 100%; text-align: center;
+            font-size: 24px; font-weight: 900;
+            color: #94a3b8;
+        }
+
+        /* Scene 3: 엔딩 (일출) */
+        .sunrise-bg {
+            background: radial-gradient(circle at bottom, #fcd34d 0%, #f59e0b 30%, #ea580c 60%, #1e1e24 100%) !important;
+        }
+        .trophy { font-size: 60px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(253, 230, 138, 0.8); }
+        .score-board {
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            margin: 20px 0;
+            width: 300px;
+        }
+        .score-board p { margin: 5px 0; display: flex; justify-content: space-between; }
+        .stars { color: #fcd34d; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="header">
+        <span id="scene-title">Scene 01</span>
+        <span class="time-badge" id="time-display">04:25 AM</span>
+    </div>
+
+    <!-- Scene 1: 시작 화면 -->
+    <div class="scene active" id="scene-1">
+        <div class="main-title">GOLDEN TIME<br>DAWN LIVING ROOM</div>
+        <p style="color: #94a3b8; margin-bottom: 30px;">새벽 4시 25분, 가족이 쓰러졌습니다.</p>
+        <button class="btn" onclick="startCPR()">🎁 시작 (04:25:00)</button>
+    </div>
+
+    <!-- Scene 2: CPR 실시간 압박 UI -->
+    <div class="scene" id="scene-2">
+        <div class="main-title" style="font-size: 22px; margin-bottom: 5px;">GOLDEN TIME: DAWN LIVING ROOM</div>
+        <div class="cpr-layout">
+            
+            <!-- 왼쪽 패널 -->
+            <div class="info-panel panel-left">
+                <div style="color:#cbd5e1; margin-bottom:5px;">첫번째 단계:</div>
+                <div style="font-size: 16px; font-weight: bold;">위치 확인 후 압박!</div>
+            </div>
+
+            <!-- 중앙 CPR 타겟 -->
+            <div class="human-torso"></div>
+            <div class="cpr-target-zone">
+                <div class="ring ring-outer" id="ring-out"></div>
+                <div class="ring ring-inner" id="ring-in"></div>
+                
+                <div class="press-btn" onmousedown="pressCPR()" ontouchstart="pressCPR()">🙏</div>
+                
+                <div class="bpm-display" id="bpm-display">0 BPM</div>
+            </div>
+
+            <!-- 오른쪽 스탯 패널 -->
+            <div class="info-panel panel-right">
+                <div class="stat-row">성공 횟수 <span class="stat-value" id="stat-count">0 / 30</span></div>
+                <hr style="border: 0; border-top: 1px solid #475569; margin: 10px 0;">
+                <div class="stat-row">템포 <span class="stat-value" id="stat-tempo" style="color: #94a3b8;">대기 중</span></div>
+                <div class="stat-row">피드백 <span class="stat-value" id="stat-feedback" style="color: #94a3b8;">-</span></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scene 3: 엔딩 화면 -->
+    <div class="scene" id="scene-3">
+        <div class="trophy">🏆</div>
+        <div class="main-title">MISSION COMPLETE!</div>
+        <div style="font-size: 18px; font-weight: bold;">골든타임을 지켰습니다! (황금의 아침이 밝았습니다)</div>
+        
+        <div class="score-board">
+            <p>1. 안전 & 반응 확인 <span class="stars">⭐⭐⭐</span></p>
+            <p>2. 호흡 확인 & 119 <span class="stars">⭐⭐⭐</span></p>
+            <p>3. CPR 가슴압박 <span class="stars">⭐⭐⭐⭐ (박자 보너스!)</span></p>
+            <p>4. AED 패드 & 충격 <span class="stars">⭐⭐⭐</span></p>
+            <hr style="border: 0; border-top: 1px solid #475569; margin: 10px 0;">
+            <p style="font-weight: bold; font-size: 18px; justify-content: center; color: var(--yellow);">총점 12 / 12</p>
+        </div>
+
+        <div style="background: rgba(245, 158, 11, 0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            🎁 게임에서는 마우스로 사람을 살렸습니다.<br>
+            이제, 실제 마네킹으로 해볼 차례입니다! 😍<br>
+            <span style="font-size: 14px; color: #cbd5e1;">(진짜 골든타임을 위하여!)</span>
+        </div>
+
+        <button class="btn" onclick="location.reload()">❤️ [ CPR 실습하러 가기 ]</button>
+    </div>
+
+</div>
+
+<script>
+    let cprCount = 0;
+    let lastTime = 0;
+    
+    function switchScene(sceneId, titleText) {
+        document.querySelectorAll('.scene').forEach(el => el.classList.remove('active'));
+        document.getElementById(sceneId).classList.add('active');
+        document.getElementById('scene-title').innerText = titleText;
+    }
+
+    function startCPR() {
+        switchScene('scene-2', 'Scene 10 (CPR 진행)');
+    }
+
+    function pressCPR() {
+        const now = Date.now();
+        let diff = now - lastTime;
+        let bpm = 0;
+
+        if (lastTime !== 0) {
+            bpm = Math.round(60000 / diff);
+        }
+        lastTime = now;
+
+        const ringOut = document.getElementById('ring-out');
+        const ringIn = document.getElementById('ring-in');
+        const statTempo = document.getElementById('stat-tempo');
+        const statFeedback = document.getElementById('stat-feedback');
+        const bpmDisplay = document.getElementById('bpm-display');
+
+        // 박자(BPM) 판별 로직: 100 ~ 120이 최적
+        if (bpm === 0) {
+            // 첫 번째 클릭
+            statTempo.innerText = "측정 중";
+            statTempo.style.color = "var(--yellow)";
+            statFeedback.innerText = "계속 누르세요";
+            setRingColor("#3b82f6"); 
+        } else if (bpm >= 95 && bpm <= 125) {
+            // 정확 (약간의 유예 범위 포함)
+            cprCount++;
+            statTempo.innerText = `정확 (${bpm})`;
+            statTempo.style.color = "var(--green)";
+            statFeedback.innerText = "깊이 충분";
+            statFeedback.style.color = "var(--green)";
+            bpmDisplay.style.color = "var(--green)";
+            setRingColor("var(--green)");
+        } else if (bpm > 125) {
+            // 너무 빠름
+            statTempo.innerText = `빠름 (${bpm})`;
+            statTempo.style.color = "var(--red)";
+            statFeedback.innerText = "조금 천천히!";
+            statFeedback.style.color = "var(--red)";
+            bpmDisplay.style.color = "var(--red)";
+            setRingColor("var(--red)");
+        } else {
+            // 너무 느림
+            statTempo.innerText = `느림 (${bpm})`;
+            statTempo.style.color = "var(--yellow)";
+            statFeedback.innerText = "더 빠르게!";
+            statFeedback.style.color = "var(--yellow)";
+            bpmDisplay.style.color = "var(--yellow)";
+            setRingColor("var(--yellow)");
+        }
+
+        bpmDisplay.innerText = `${bpm} BPM`;
+        document.getElementById('stat-count').innerText = `${cprCount} / 30`;
+
+        // 링 애니메이션 효과
+        ringOut.style.transform = "rotate(45deg) scale(1.1)";
+        ringIn.style.transform = "rotate(45deg) scale(0.9)";
+        setTimeout(() => {
+            ringOut.style.transform = "rotate(45deg) scale(1)";
+            ringIn.style.transform = "rotate(45deg) scale(1)";
+        }, 100);
+
+        // 30회 달성 시 엔딩
+        if (cprCount >= 30) {
+            setTimeout(showEnding, 500);
+        }
+    }
+
+    function setRingColor(color) {
+        document.getElementById('ring-out').style.borderColor = color;
+        document.getElementById('ring-out').style.borderTopColor = 'transparent';
+        document.getElementById('ring-out').style.borderBottomColor = 'transparent';
+        
+        document.getElementById('ring-in').style.borderColor = color;
+        document.getElementById('ring-in').style.borderLeftColor = 'transparent';
+        document.getElementById('ring-in').style.borderRightColor = 'transparent';
+    }
+
+    function showEnding() {
+        const container = document.getElementById('game-container');
+        document.getElementById('time-display').innerText = "04:32 AM";
+        container.classList.add('sunrise-bg'); // 배경 일출 애니메이션
+        switchScene('scene-3', 'Scene 10 (종료)');
+    }
+</script>
+</body>
+</html>

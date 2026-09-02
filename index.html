@@ -3,789 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>골든타임 : 새벽의 거실</title>
+    <title>GOLDEN TIME: DAWN LIVING ROOM</title>
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --card-bg: #161f33;
-            --text-color: #f1f5f9;
-            --accent-red: #ef4444;
-            --accent-yellow: #f59e0b;
-            --accent-green: #10b981;
-            --accent-blue: #3b82f6;
+            --bg-dark: #0a0e17;
+            --panel-bg: rgba(30, 41, 59, 0.8);
+            --green: #10b981;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --text-light: #f8fafc;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
-            user-select: none;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; user-select: none; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            transition: background-color 1s ease;
+            color: var(--text-light);
+            transition: background 1.5s ease;
         }
 
-        /* 캔버스 / 앱 용기 */
         #game-container {
             width: 100%;
-            max-width: 480px;
-            height: 720px;
-            background-color: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            max-width: 800px;
+            height: 600px;
+            background: linear-gradient(to bottom, #111827, #1e1e24);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            transition: background-color 1s ease;
+            border: 2px solid #334155;
+            transition: all 1.5s ease;
         }
 
-        /* 헤더 상태 바 */
-        .header-bar {
-            height: 50px;
-            padding: 0 20px;
+        /* 공통 UI */
+        .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.3);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 25px;
+            background: rgba(0,0,0,0.5);
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
+            z-index: 10;
         }
+        
+        .time-badge { background: #1e293b; padding: 5px 12px; border-radius: 20px; color: #94a3b8; }
 
-        .time-display {
-            color: var(--accent-yellow);
-            letter-spacing: 1px;
-        }
-
-        /* 화면 씬 공통 */
         .scene {
             display: none;
             flex: 1;
-            padding: 24px;
+            padding: 20px;
             flex-direction: column;
-            justify-content: space-between;
             align-items: center;
+            justify-content: center;
             text-align: center;
-            animation: fadeIn 0.4s ease-in-out;
+            animation: fadeIn 0.5s ease;
         }
+        .scene.active { display: flex; }
 
-        .scene.active {
-            display: flex;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 공통 타이틀 및 설명 */
-        .title {
-            font-size: 22px;
-            font-weight: 800;
-            margin-bottom: 8px;
-            color: #ffffff;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            color: #94a3b8;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-
-        /* 공통 버튼 */
         .btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
+            background: linear-gradient(145deg, #10b981, #059669);
+            color: white;
             border: none;
-            background-color: var(--accent-red);
-            color: white;
-            font-size: 16px;
+            padding: 15px 30px;
+            font-size: 18px;
             font-weight: bold;
+            border-radius: 30px;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            transition: transform 0.1s, filter 0.2s;
+            margin-top: 20px;
         }
+        .btn:active { transform: scale(0.95); }
+        .btn:hover { filter: brightness(1.2); }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
+        /* Scene 1: 타이틀 */
+        .main-title { font-size: 32px; font-weight: 900; letter-spacing: 2px; margin-bottom: 10px; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
 
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background-color: #334155;
-            box-shadow: none;
-        }
-
-        /* 씬 1: START */
-        .start-clock {
-            font-size: 48px;
-            font-weight: 900;
-            color: var(--accent-yellow);
-            margin: 20px 0;
-            text-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
-        }
-
-        .livingroom-img {
+        /* Scene 2: CPR 메인 UI (참고 이미지 기반) */
+        .cpr-layout {
+            display: flex;
             width: 100%;
-            height: 180px;
-            background: linear-gradient(180deg, #1e293b, #0f172a);
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 60px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* 씬 3: 반응 확인 (클릭 터치) */
-        .patient-avatar {
-            width: 180px;
-            height: 180px;
-            background-color: #1e293b;
-            border-radius: 50%;
-            position: relative;
-            margin: 20px auto;
-            border: 3px solid #475569;
-            cursor: pointer;
-        }
-
-        .shoulder-target {
-            width: 40px;
-            height: 40px;
-            background-color: rgba(239, 68, 68, 0.4);
-            border: 2px dashed var(--accent-red);
-            border-radius: 50%;
-            position: absolute;
-            top: 65%;
-            animation: pulse 1.5s infinite;
-        }
-
-        .shoulder-target.left { left: 15px; }
-        .shoulder-target.right { right: 15px; }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(0.95); opacity: 0.8; }
-        }
-
-        /* 씬 4: 호흡 확인 (카운트다운) */
-        .timer-circle {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 4px solid var(--accent-blue);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 36px;
-            font-weight: bold;
-            color: var(--accent-blue);
-            margin: 20px auto;
-        }
-
-        /* 씬 5: 119 신고 */
-        .quiz-options {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .option-card {
-            background-color: #1e293b;
-            padding: 16px;
-            border-radius: 10px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            text-align: left;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-
-        .option-card:hover {
-            border-color: var(--accent-blue);
-            background-color: #24334d;
-        }
-
-        .option-card.selected {
-            border-color: var(--accent-green);
-            background-color: rgba(16, 185, 129, 0.1);
-        }
-
-        /* 씬 6, 9: CPR 메인 */
-        .chest-target-zone {
-            width: 200px;
-            height: 200px;
-            background: #1e293b;
-            border-radius: 16px;
-            position: relative;
-            margin: 10px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .chest-point {
-            width: 50px;
-            height: 50px;
-            background-color: rgba(239, 68, 68, 0.3);
-            border: 3px solid var(--accent-red);
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            animation: pulse 1s infinite;
-        }
-
-        .press-counter {
-            font-size: 32px;
-            font-weight: 900;
-            color: var(--accent-yellow);
-            margin: 10px 0;
-        }
-
-        .press-btn {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #ef4444, #b91c1c);
-            border: 4px solid #fca5a5;
-            color: white;
-            font-size: 20px;
-            font-weight: 900;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.5);
-            transition: transform 0.05s;
-        }
-
-        .press-btn:active {
-            transform: scale(0.92);
-        }
-
-        .tempo-indicator {
-            height: 10px;
-            width: 100%;
-            background-color: #334155;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-bottom: 10px;
-            position: relative;
-        }
-
-        .tempo-bar {
             height: 100%;
-            width: 0%;
-            background-color: var(--accent-green);
-            transition: width 0.1s linear;
-        }
-
-        .tempo-feedback {
-            font-weight: bold;
-            font-size: 14px;
-            height: 20px;
-        }
-
-        /* 씬 7: AED 숨은그림찾기 */
-        .item-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            width: 100%;
-            margin: 20px 0;
-        }
-
-        .grid-item {
-            aspect-ratio: 1;
-            background-color: #1e293b;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 36px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .grid-item:hover {
-            border-color: var(--accent-blue);
-            transform: scale(1.05);
-        }
-
-        .grid-item span {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
-
-        /* 씬 8: AED 패드 부착 */
-        .pad-target-body {
-            width: 180px;
-            height: 220px;
-            background-color: #1e293b;
-            border-radius: 20px;
-            position: relative;
-            margin: 10px auto;
-            border: 2px solid #475569;
-        }
-
-        .pad-slot {
-            width: 50px;
-            height: 50px;
-            border: 2px dashed var(--accent-yellow);
-            border-radius: 8px;
-            position: absolute;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 10px;
-            color: var(--accent-yellow);
-        }
-
-        .pad-slot.top-right { top: 20px; right: 20px; }
-        .pad-slot.bottom-left { bottom: 30px; left: 20px; }
-
-        .pad-container {
-            display: flex;
-            gap: 20px;
-            margin-top: 10px;
-        }
-
-        .pad-item {
-            width: 60px;
-            height: 60px;
-            background-color: var(--accent-yellow);
-            color: #0f172a;
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: grab;
-        }
-
-        /* 씬 10: 엔딩 */
-        .score-board {
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 15px 0;
-            text-align: left;
-        }
-
-        .score-row {
-            display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 배경 사람 인체 실루엣 느낌 */
+        .human-torso {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -45%);
+            width: 350px; height: 400px;
+            background: radial-gradient(ellipse at center, rgba(71, 85, 105, 0.4) 0%, transparent 70%);
+            z-index: 0;
+            border-radius: 50% 50% 0 0;
+        }
+
+        /* 링 애니메이션 및 타겟 */
+        .cpr-target-zone {
+            position: relative;
+            z-index: 2;
+            width: 240px; height: 240px;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 8px solid #334155;
+            transition: border-color 0.1s ease, transform 0.1s ease;
+        }
+        .ring-outer { width: 220px; height: 220px; border-top-color: transparent; border-bottom-color: transparent; transform: rotate(45deg); }
+        .ring-inner { width: 170px; height: 170px; border-left-color: transparent; border-right-color: transparent; transform: rotate(45deg); }
+        
+        .press-btn {
+            position: relative;
+            z-index: 3;
+            width: 90px; height: 90px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 4px solid var(--red);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 40px; cursor: pointer;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+        }
+        .press-btn:active { transform: scale(0.9); }
+
+        /* 안내 패널들 */
+        .info-panel {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
             font-size: 14px;
+            z-index: 2;
+            backdrop-filter: blur(5px);
         }
 
-        .star-rating {
-            color: var(--accent-yellow);
+        .panel-left { width: 200px; text-align: left; }
+        .panel-right { width: 220px; text-align: left; }
+        
+        .stat-row { margin-bottom: 8px; font-weight: bold; font-size: 16px; }
+        .stat-value { color: var(--green); float: right; }
+
+        .bpm-display {
+            position: absolute;
+            bottom: -40px;
+            width: 100%; text-align: center;
+            font-size: 24px; font-weight: 900;
+            color: #94a3b8;
         }
 
-        .final-quote {
-            background-color: rgba(239, 68, 68, 0.15);
-            border-left: 4px solid var(--accent-red);
-            padding: 12px;
-            border-radius: 0 8px 8px 0;
-            font-size: 13px;
-            line-height: 1.5;
+        /* Scene 3: 엔딩 (일출) */
+        .sunrise-bg {
+            background: radial-gradient(circle at bottom, #fcd34d 0%, #f59e0b 30%, #ea580c 60%, #1e1e24 100%) !important;
+        }
+        .trophy { font-size: 60px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(253, 230, 138, 0.8); }
+        .score-board {
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            border-radius: 10px;
             text-align: left;
-            margin: 10px 0;
+            margin: 20px 0;
+            width: 300px;
         }
+        .score-board p { margin: 5px 0; display: flex; justify-content: space-between; }
+        .stars { color: #fcd34d; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <!--상단 헤더-->
-    <div class="header-bar">
-        <span>CASE 01</span>
-        <span class="time-display" id="time-display">02:17 AM</span>
+    <div class="header">
+        <span id="scene-title">Scene 01</span>
+        <span class="time-badge" id="time-display">04:25 AM</span>
     </div>
 
-    <!-- 1. START -->
+    <!-- Scene 1: 시작 화면 -->
     <div class="scene active" id="scene-1">
-        <div>
-            <div class="start-clock">02:17</div>
-            <div class="livingroom-img">🛋️ 🛌</div>
-            <div class="title">GOLDEN TIME</div>
-            <div class="subtitle">새벽의 거실</div>
-            <p style="font-size: 14px; color: #cbd5e1;">거실에서 누군가 불길한 소리를 내며 쓰러졌습니다.</p>
-        </div>
-        <button class="btn" onclick="goToScene(2)">사건 시작 ▶</button>
+        <div class="main-title">GOLDEN TIME<br>DAWN LIVING ROOM</div>
+        <p style="color: #94a3b8; margin-bottom: 30px;">새벽 4시 25분, 가족이 쓰러졌습니다.</p>
+        <button class="btn" onclick="startCPR()">🎁 시작 (04:25:00)</button>
     </div>
 
-    <!-- 2. 안전 확인 -->
+    <!-- Scene 2: CPR 실시간 압박 UI -->
     <div class="scene" id="scene-2">
-        <div>
-            <div class="title">주변 안전 확인</div>
-            <div class="subtitle">쓰러진 사람을 발견했습니다.<br>가장 먼저 무엇을 해야 할까요?</div>
-            <div class="livingroom-img" style="font-size: 70px;">🧍‍♂️💥</div>
+        <div class="main-title" style="font-size: 22px; margin-bottom: 5px;">GOLDEN TIME: DAWN LIVING ROOM</div>
+        <div class="cpr-layout">
+            
+            <!-- 왼쪽 패널 -->
+            <div class="info-panel panel-left">
+                <div style="color:#cbd5e1; margin-bottom:5px;">첫번째 단계:</div>
+                <div style="font-size: 16px; font-weight: bold;">위치 확인 후 압박!</div>
+            </div>
+
+            <!-- 중앙 CPR 타겟 -->
+            <div class="human-torso"></div>
+            <div class="cpr-target-zone">
+                <div class="ring ring-outer" id="ring-out"></div>
+                <div class="ring ring-inner" id="ring-in"></div>
+                
+                <div class="press-btn" onmousedown="pressCPR()" ontouchstart="pressCPR()">🙏</div>
+                
+                <div class="bpm-display" id="bpm-display">0 BPM</div>
+            </div>
+
+            <!-- 오른쪽 스탯 패널 -->
+            <div class="info-panel panel-right">
+                <div class="stat-row">성공 횟수 <span class="stat-value" id="stat-count">0 / 30</span></div>
+                <hr style="border: 0; border-top: 1px solid #475569; margin: 10px 0;">
+                <div class="stat-row">템포 <span class="stat-value" id="stat-tempo" style="color: #94a3b8;">대기 중</span></div>
+                <div class="stat-row">피드백 <span class="stat-value" id="stat-feedback" style="color: #94a3b8;">-</span></div>
+            </div>
+
         </div>
-        <button class="btn" onclick="checkSafety()">주변 안전 확인하기</button>
     </div>
 
-    <!-- 3. 반응 확인 -->
+    <!-- Scene 3: 엔딩 화면 -->
     <div class="scene" id="scene-3">
-        <div>
-            <div class="title">MISSION 01</div>
-            <div class="subtitle">환자의 어깨를 가볍게 두드리며<br>반응을 확인하세요! (어깨 클릭)</div>
-            <div class="patient-avatar">
-                <div class="shoulder-target left" onclick="tapShoulder()"></div>
-                <div class="shoulder-target right" onclick="tapShoulder()"></div>
-            </div>
-            <p id="shoulder-msg" style="font-size: 14px; color: #f59e0b; min-height: 20px;"></p>
+        <div class="trophy">🏆</div>
+        <div class="main-title">MISSION COMPLETE!</div>
+        <div style="font-size: 18px; font-weight: bold;">골든타임을 지켰습니다! (황금의 아침이 밝았습니다)</div>
+        
+        <div class="score-board">
+            <p>1. 안전 & 반응 확인 <span class="stars">⭐⭐⭐</span></p>
+            <p>2. 호흡 확인 & 119 <span class="stars">⭐⭐⭐</span></p>
+            <p>3. CPR 가슴압박 <span class="stars">⭐⭐⭐⭐ (박자 보너스!)</span></p>
+            <p>4. AED 패드 & 충격 <span class="stars">⭐⭐⭐</span></p>
+            <hr style="border: 0; border-top: 1px solid #475569; margin: 10px 0;">
+            <p style="font-weight: bold; font-size: 18px; justify-content: center; color: var(--yellow);">총점 12 / 12</p>
         </div>
-        <button class="btn btn-secondary" id="scene3-next" style="display:none;" onclick="goToScene(4)">다음 단계 ▶</button>
+
+        <div style="background: rgba(245, 158, 11, 0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            🎁 게임에서는 마우스로 사람을 살렸습니다.<br>
+            이제, 실제 마네킹으로 해볼 차례입니다! 😍<br>
+            <span style="font-size: 14px; color: #cbd5e1;">(진짜 골든타임을 위하여!)</span>
+        </div>
+
+        <button class="btn" onclick="location.reload()">❤️ [ CPR 실습하러 가기 ]</button>
     </div>
 
-    <!-- 4. 호흡 확인 -->
-    <div class="scene" id="scene-4">
-        <div>
-            <div class="title">MISSION 02</div>
-            <div class="subtitle">환자의 가슴을 관찰하며<br>정상적인 호흡이 있는지 5초간 확인하세요.</div>
-            <div class="timer-circle" id="breath-timer">5</div>
-            <p id="breath-status" style="font-size: 14px; color: #94a3b8;"></p>
-        </div>
-        <button class="btn" id="breath-btn" onclick="startBreathCheck()">호흡 확인 시작</button>
-    </div>
-
-    <!-- 5. 119 신고 -->
-    <div class="scene" id="scene-5">
-        <div>
-            <div class="title">MISSION 03</div>
-            <div class="subtitle">📞 119 상황실 연결됨<br>"무슨 일이신가요? 올바르게 상황을 전달하세요."</div>
-            <div class="quiz-options">
-                <div class="option-card" onclick="selectQuiz(this, false)">○ 사람이 좀 이상해요. 빨리 와주세요!</div>
-                <div class="option-card" onclick="selectQuiz(this, true)">● 사람이 쓰러졌고 의식과 정상 호흡이 없습니다.</div>
-                <div class="option-card" onclick="selectQuiz(this, false)">○ 자고 있는 것 같은데 안 깨어나요.</div>
-            </div>
-        </div>
-        <button class="btn" onclick="submitCall119()">신고하기</button>
-    </div>
-
-    <!-- 6. CPR - 위치 선정 및 30회 압박 -->
-    <div class="scene" id="scene-6">
-        <div>
-            <div class="title">MISSION 04</div>
-            <div class="subtitle" id="cpr1-sub">가슴 뼈 중앙(압박 위치)을 정확히 선택하세요!</div>
-            
-            <div class="chest-target-zone" id="cpr-zone">
-                <div class="chest-point" id="chest-point" onclick="startCPR1Compressions()">❤️</div>
-            </div>
-
-            <div class="press-counter" id="cpr1-count" style="display:none;">0 / 30</div>
-        </div>
-        <button class="press-btn" id="cpr1-press-btn" style="display:none;" onclick="pressCPR1()">PRESS</button>
-    </div>
-
-    <!-- 7. AED 찾기 -->
-    <div class="scene" id="scene-7">
-        <div>
-            <div class="title">MISSION 05</div>
-            <div class="subtitle">거실 주변에서 응급 처치 장비인<br><b>AED(자동심장충격기)</b>를 찾으세요!</div>
-            
-            <div class="item-grid">
-                <div class="grid-item" onclick="wrongItem()">🎒<span>책가방</span></div>
-                <div class="grid-item" onclick="wrongItem()">📺<span>TV</span></div>
-                <div class="grid-item" onclick="wrongItem()">🧰<span>공구함</span></div>
-                <div class="grid-item" onclick="foundAED()">🟥<span>AED</span></div>
-                <div class="grid-item" onclick="wrongItem()">🧸<span>인형</span></div>
-                <div class="grid-item" onclick="wrongItem()">📦<span>택배상자</span></div>
-            </div>
-            <p id="aed-search-msg" style="font-size: 14px; color: var(--accent-red); min-height: 20px;"></p>
-        </div>
-    </div>
-
-    <!-- 8. AED 패드 붙이기 -->
-    <div class="scene" id="scene-8">
-        <div>
-            <div class="title">MISSION 06</div>
-            <div class="subtitle">두 개의 AED 패드를<br>올바른 위치(우측 빗장뼈 아래, 좌측 겨드랑이 아래)에 클릭하여 붙이세요!</div>
-            
-            <div class="pad-target-body">
-                <div class="pad-slot top-right" id="slot-1" onclick="attachPad(1)">패드 1</div>
-                <div class="pad-slot bottom-left" id="slot-2" onclick="attachPad(2)">패드 2</div>
-            </div>
-            <p id="pad-msg" style="font-size: 14px; color: var(--accent-yellow);"></p>
-        </div>
-        <button class="btn" id="aed-shock-btn" style="display:none;" onclick="triggerShock()">🚨 모두 물러나고 충격 버튼 누르기</button>
-    </div>
-
-    <!-- 9. CPR 2차 (박자 맞추기) -->
-    <div class="scene" id="scene-9">
-        <div>
-            <div class="title">MISSION 07</div>
-            <div class="subtitle">1분당 100~120회 속도(템포)에 맞춰<br>가슴압박 30회를 이어가세요!</div>
-            
-            <div class="tempo-indicator">
-                <div class="tempo-bar" id="tempo-bar"></div>
-            </div>
-            <div class="tempo-feedback" id="tempo-feedback">준비되면 PRESS를 누르세요!</div>
-
-            <div class="press-counter" id="cpr2-count">0 / 30</div>
-        </div>
-        <button class="press-btn" onclick="pressCPR2()">PRESS</button>
-    </div>
-
-    <!-- 10. 엔딩 -->
-    <div class="scene" id="scene-10">
-        <div>
-            <div style="font-size: 50px;">🏆</div>
-            <div class="title">MISSION COMPLETE</div>
-            <div class="subtitle">당신의 신속한 처치로 골든타임을 지켰습니다!</div>
-
-            <div class="score-board">
-                <div class="score-row"><span>1. 안전 & 반응 확인</span><span class="star-rating">⭐⭐</span></div>
-                <div class="score-row"><span>2. 호흡 확인 & 119</span><span class="star-rating">⭐⭐</span></div>
-                <div class="score-row"><span>3. CPR 가슴압박</span><span class="star-rating">⭐⭐⭐</span></div>
-                <div class="score-row"><span>4. AED 패드 & 충격</span><span class="star-rating">⭐⭐⭐</span></div>
-                <hr style="border-color: rgba(255,255,255,0.1); margin: 8px 0;">
-                <div class="score-row" style="font-weight: bold;"><span>총점</span><span style="color:var(--accent-yellow);">10 / 10</span></div>
-            </div>
-
-            <div class="final-quote">
-                <strong>"게임에서는 마우스로 사람을 살렸습니다.<br>이제 실제 마네킹으로 해볼 차례입니다."</strong>
-            </div>
-        </div>
-        <button class="btn" style="background-color: var(--accent-green);" onclick="location.reload()">❤️ 다시 도전하기</button>
-    </div>
 </div>
 
 <script>
-    // Audio Context (비프음/효과음)
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let cprCount = 0;
+    let lastTime = 0;
     
-    function playBeep(freq = 440, type = 'sine', duration = 0.1) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.value = freq;
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-        osc.stop(audioCtx.currentTime + duration);
+    function switchScene(sceneId, titleText) {
+        document.querySelectorAll('.scene').forEach(el => el.classList.remove('active'));
+        document.getElementById(sceneId).classList.add('active');
+        document.getElementById('scene-title').innerText = titleText;
     }
 
-    // 씬 전환 & 배경색 그라데이션 변화 (어둠 -> 따뜻함)
-    function goToScene(sceneNum) {
-        document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
-        document.getElementById(`scene-${sceneNum}`).classList.add('active');
-
-        const container = document.getElementById('game-container');
-        const body = document.body;
-
-        // 진행률에 따른 배경 색상 연출
-        if (sceneNum >= 10) {
-            // 따뜻한 엔딩 (금빛 / 밝은 톤)
-            body.style.backgroundColor = '#1e293b';
-            container.style.backgroundColor = '#1e293b';
-            document.getElementById('time-display').innerText = "02:25 AM (구조 완료)";
-            document.getElementById('time-display').style.color = "#10b981";
-        } else if (sceneNum >= 6) {
-            // 미션 진행 중 (중간 톤)
-            body.style.backgroundColor = '#0f172a';
-            container.style.backgroundColor = '#1e293b';
-        }
+    function startCPR() {
+        switchScene('scene-2', 'Scene 10 (CPR 진행)');
     }
 
-    // Scene 2: 안전 확인
-    function checkSafety() {
-        playBeep(587, 'sine', 0.15);
-        alert("현장은 안전합니다! 다음으로 환자의 상태를 확인합니다.");
-        goToScene(3);
-    }
-
-    // Scene 3: 반응 확인
-    let shoulderTaps = 0;
-    function tapShoulder() {
-        shoulderTaps++;
-        playBeep(300, 'square', 0.08);
-        const msg = document.getElementById('shoulder-msg');
-        if (shoulderTaps === 1) {
-            msg.innerText = '"괜찮으세요?!" (반응 없음)';
-        } else if (shoulderTaps >= 2) {
-            msg.innerText = '"반응이 없습니다! 즉시 호흡을 확인해야 합니다."';
-            document.getElementById('scene3-next').style.display = 'block';
-        }
-    }
-
-    // Scene 4: 호흡 확인
-    function startBreathCheck() {
-        document.getElementById('breath-btn').style.display = 'none';
-        let count = 5;
-        const timerEl = document.getElementById('breath-timer');
-        const statusEl = document.getElementById('breath-status');
-
-        statusEl.innerText = "가슴의 움직임을 관찰하고 있습니다...";
-        
-        const interval = setInterval(() => {
-            count--;
-            timerEl.innerText = count;
-            playBeep(400, 'sine', 0.05);
-
-            if (count <= 0) {
-                clearInterval(interval);
-                timerEl.innerText = "❌";
-                timerEl.style.borderColor = "var(--accent-red)";
-                statusEl.style.color = "var(--accent-red)";
-                statusEl.innerHTML = "<b>정상적인 호흡이 없습니다! (심정지 의심)</b>";
-                
-                setTimeout(() => {
-                    goToScene(5);
-                }, 1500);
-            }
-        }, 1000);
-    }
-
-    // Scene 5: 119 신고 퀴즈
-    let quizPassed = false;
-    function selectQuiz(element, isCorrect) {
-        document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-        element.classList.add('selected');
-        quizPassed = isCorrect;
-    }
-
-    function submitCall119() {
-        if (quizPassed) {
-            playBeep(880, 'sine', 0.2);
-            alert("119 상황실: '정확한 신고요청 감사합니다. 구급대를 출동시켰으니 즉시 CPR을 시작하세요!'");
-            goToScene(6);
-        } else {
-            playBeep(220, 'triangle', 0.25);
-            alert("올바른 신고 내용이 아닙니다. 정확한 환자 상태(의식/호흡 없음)를 전달해주세요.");
-        }
-    }
-
-    // Scene 6: CPR 1차
-    let cpr1Presses = 0;
-    function startCPR1Compressions() {
-        playBeep(600, 'sine', 0.1);
-        document.getElementById('chest-point').style.display = 'none';
-        document.getElementById('cpr1-sub').innerText = "PRESS 버튼을 누르거나 클릭하여 30회 압박하세요!";
-        document.getElementById('cpr1-count').style.display = 'block';
-        document.getElementById('cpr1-press-btn').style.display = 'inline-block';
-    }
-
-    function pressCPR1() {
-        cpr1Presses++;
-        playBeep(400 + (cpr1Presses * 10), 'sine', 0.05);
-        document.getElementById('cpr1-count').innerText = `${cpr1Presses} / 30`;
-
-        if (cpr1Presses >= 30) {
-            playBeep(880, 'sine', 0.3);
-            alert("가슴압박 30회 완료! 주변에 있는 AED를 확보하세요.");
-            goToScene(7);
-        }
-    }
-
-    // Scene 7: AED 숨은그림찾기
-    function wrongItem() {
-        playBeep(200, 'sawtooth', 0.15);
-        document.getElementById('aed-search-msg').innerText = "이건 AED가 아닙니다! 다시 찾아보세요.";
-    }
-
-    function foundAED() {
-        playBeep(880, 'sine', 0.3);
-        alert("AED(자동심장충격기)를 발견했습니다!");
-        goToScene(8);
-    }
-
-    // Scene 8: AED 패드 부착
-    let padsAttached = 0;
-    function attachPad(slotNum) {
-        const slot = document.getElementById(`slot-${slotNum}`);
-        if (slot.style.backgroundColor !== 'var(--accent-green)') {
-            slot.style.backgroundColor = 'var(--accent-green)';
-            slot.style.color = '#fff';
-            slot.innerText = '부착완료';
-            padsAttached++;
-            playBeep(523, 'sine', 0.1);
-
-            if (padsAttached === 2) {
-                document.getElementById('pad-msg').innerText = '🔊 "심장 리듬 분석 중... 제세동이 필요합니다."';
-                document.getElementById('aed-shock-btn').style.display = 'block';
-            }
-        }
-    }
-
-    function triggerShock() {
-        playBeep(1000, 'square', 0.4);
-        alert("⚡ 제세동 충격이 완료되었습니다! 즉시 가슴압박을 다시 시작합니다.");
-        goToScene(9);
-    }
-
-    // Scene 9: CPR 2차 (박자 맞추기)
-    let cpr2Presses = 0;
-    let lastPressTime = 0;
-
-    function pressCPR2() {
+    function pressCPR() {
         const now = Date.now();
-        cpr2Presses++;
-        document.getElementById('cpr2-count').innerText = `${cpr2Presses} / 30`;
+        let diff = now - lastTime;
+        let bpm = 0;
 
-        if (lastPressTime !== 0) {
-            const diff = now - lastPressTime; // ms 단위
-            const tempoBar = document.getElementById('tempo-bar');
-            const feedback = document.getElementById('tempo-feedback');
-
-            // ideal tempo: 100~120 bpm -> 500ms ~ 600ms 사이 interval
-            if (diff >= 450 && diff <= 650) {
-                tempoBar.style.width = '100%';
-                tempoBar.style.backgroundColor = 'var(--accent-green)';
-                feedback.innerText = '좋은 속도입니다! 🟢 (100~120회/분)';
-                feedback.style.color = 'var(--accent-green)';
-                playBeep(600, 'sine', 0.05);
-            } else if (diff < 450) {
-                tempoBar.style.width = '30%';
-                tempoBar.style.backgroundColor = 'var(--accent-yellow)';
-                feedback.innerText = '조금 빠릅니다! ⚠️ 천천히 눌러주세요.';
-                feedback.style.color = 'var(--accent-yellow)';
-                playBeep(700, 'sine', 0.05);
-            } else {
-                tempoBar.style.width = '30%';
-                tempoBar.style.backgroundColor = 'var(--accent-yellow)';
-                feedback.innerText = '조금 느립니다! ⚠️ 더 빠르게 누르세요.';
-                feedback.style.color = 'var(--accent-yellow)';
-                playBeep(350, 'sine', 0.05);
-            }
+        if (lastTime !== 0) {
+            bpm = Math.round(60000 / diff);
         }
-        lastPressTime = now;
+        lastTime = now;
 
-        if (cpr2Presses >= 30) {
-            playBeep(880, 'sine', 0.4);
-            setTimeout(() => {
-                goToScene(10);
-            }, 500);
+        const ringOut = document.getElementById('ring-out');
+        const ringIn = document.getElementById('ring-in');
+        const statTempo = document.getElementById('stat-tempo');
+        const statFeedback = document.getElementById('stat-feedback');
+        const bpmDisplay = document.getElementById('bpm-display');
+
+        // 박자(BPM) 판별 로직: 100 ~ 120이 최적
+        if (bpm === 0) {
+            // 첫 번째 클릭
+            statTempo.innerText = "측정 중";
+            statTempo.style.color = "var(--yellow)";
+            statFeedback.innerText = "계속 누르세요";
+            setRingColor("#3b82f6"); 
+        } else if (bpm >= 95 && bpm <= 125) {
+            // 정확 (약간의 유예 범위 포함)
+            cprCount++;
+            statTempo.innerText = `정확 (${bpm})`;
+            statTempo.style.color = "var(--green)";
+            statFeedback.innerText = "깊이 충분";
+            statFeedback.style.color = "var(--green)";
+            bpmDisplay.style.color = "var(--green)";
+            setRingColor("var(--green)");
+        } else if (bpm > 125) {
+            // 너무 빠름
+            statTempo.innerText = `빠름 (${bpm})`;
+            statTempo.style.color = "var(--red)";
+            statFeedback.innerText = "조금 천천히!";
+            statFeedback.style.color = "var(--red)";
+            bpmDisplay.style.color = "var(--red)";
+            setRingColor("var(--red)");
+        } else {
+            // 너무 느림
+            statTempo.innerText = `느림 (${bpm})`;
+            statTempo.style.color = "var(--yellow)";
+            statFeedback.innerText = "더 빠르게!";
+            statFeedback.style.color = "var(--yellow)";
+            bpmDisplay.style.color = "var(--yellow)";
+            setRingColor("var(--yellow)");
         }
+
+        bpmDisplay.innerText = `${bpm} BPM`;
+        document.getElementById('stat-count').innerText = `${cprCount} / 30`;
+
+        // 링 애니메이션 효과
+        ringOut.style.transform = "rotate(45deg) scale(1.1)";
+        ringIn.style.transform = "rotate(45deg) scale(0.9)";
+        setTimeout(() => {
+            ringOut.style.transform = "rotate(45deg) scale(1)";
+            ringIn.style.transform = "rotate(45deg) scale(1)";
+        }, 100);
+
+        // 30회 달성 시 엔딩
+        if (cprCount >= 30) {
+            setTimeout(showEnding, 500);
+        }
+    }
+
+    function setRingColor(color) {
+        document.getElementById('ring-out').style.borderColor = color;
+        document.getElementById('ring-out').style.borderTopColor = 'transparent';
+        document.getElementById('ring-out').style.borderBottomColor = 'transparent';
+        
+        document.getElementById('ring-in').style.borderColor = color;
+        document.getElementById('ring-in').style.borderLeftColor = 'transparent';
+        document.getElementById('ring-in').style.borderRightColor = 'transparent';
+    }
+
+    function showEnding() {
+        const container = document.getElementById('game-container');
+        document.getElementById('time-display').innerText = "04:32 AM";
+        container.classList.add('sunrise-bg'); // 배경 일출 애니메이션
+        switchScene('scene-3', 'Scene 10 (종료)');
     }
 </script>
 </body>
